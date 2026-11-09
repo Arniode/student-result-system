@@ -21,6 +21,10 @@ generating reports.
 - **Reporting & analysis** including individual report cards, sorting by
   average/name/ID, class statistics and plain-text report export.
 - **Interactive menu** with robust input validation and error handling.
+- **Student ID validation** using a regular expression (1-5 letters followed
+  by 1-6 digits, e.g. `S001`, `STU12345`).
+- **Exception handling** demonstrating `try` / `except` / `else` / `finally`
+  when reading and writing the data file.
 
 ## Project Structure
 

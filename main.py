@@ -4,6 +4,7 @@ Command-line interface for the Student Result Management System.
 Run with:  python main.py
 """
 
+import re
 from datetime import datetime
 
 from student import Student
@@ -22,6 +23,21 @@ from reports import (
 # ----------------------------------------------------------------------
 # Input helpers
 # ----------------------------------------------------------------------
+# Student IDs are validated with a regular expression: one to five letters
+# followed by one to six digits (e.g. "S001" or "STU12345").
+STUDENT_ID_PATTERN = re.compile(r"^[A-Za-z]{1,5}\d{1,6}$")
+
+
+def prompt_student_id():
+    """Prompt for a student ID validated against a regular expression."""
+    while True:
+        value = input("Student ID (e.g. S001): ").strip()
+        if STUDENT_ID_PATTERN.fullmatch(value):
+            return value
+        print("Invalid ID. Use 1-5 letters followed by 1-6 digits "
+              "(e.g. S001, STU12345).")
+
+
 def prompt_non_empty(label):
     """Prompt until the user provides a non-empty string."""
     while True:
@@ -168,7 +184,7 @@ def add_student(students):
     print("                  ADD NEW STUDENT")
     print("=" * 48)
 
-    student_id = prompt_non_empty("Student ID: ")
+    student_id = prompt_student_id()
     if find_by_id(students, student_id):
         print(f"A student with ID '{student_id}' already exists.")
         return
