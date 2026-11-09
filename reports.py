@@ -5,6 +5,7 @@ Provides functions to render individual report cards, sort the student list,
 compute class-wide statistics and export plain-text reports.
 """
 
+import csv
 import os
 from datetime import datetime
 
@@ -168,5 +169,47 @@ def export_report(students, filename="class_report.txt"):
 
     with open(path, "w", encoding="utf-8") as handle:
         handle.write("\n".join(lines) + "\n")
+
+    return path
+
+
+def export_csv(students, filename="class_report.csv"):
+    """Export all student records to a CSV file.
+
+    The file is written into the ``data`` directory so it can be opened in a
+    spreadsheet application (Excel, Google Sheets, etc.). The absolute path of
+    the created file is returned.
+
+    Raises:
+        NoStudentsError: if there are no records to export.
+    """
+    if not students:
+        raise NoStudentsError("No student records to export.")
+
+    os.makedirs(DATA_DIR, exist_ok=True)
+    path = os.path.join(DATA_DIR, filename)
+
+    header = [
+        "Student ID", "Full Name", "Class/Form", "Gender", "DOB",
+        *SUBJECTS, "Total", "Average", "Grade", "Date Added",
+    ]
+
+    with open(path, "w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(header)
+        for student in students:
+            row = [
+                student.student_id,
+                student.full_name,
+                student.class_form,
+                student.gender,
+                student.dob,
+                *[student.scores.get(subject, "") for subject in SUBJECTS],
+                student.total,
+                student.average,
+                student.grade if student.grade else "",
+                student.date_added,
+            ]
+            writer.writerow(row)
 
     return path

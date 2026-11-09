@@ -19,7 +19,7 @@ generating reports.
 - **Persistent storage** in a JSON file (`data/students.json`) using safe,
   atomic writes.
 - **Reporting & analysis** including individual report cards, sorting by
-  average/name/ID, class statistics and plain-text report export.
+  average/name/ID, class statistics and export to plain-text or CSV.
 - **Interactive menu** with robust input validation and error handling.
 - **Student ID validation** using a regular expression (1-5 letters followed
   by 1-6 digits, e.g. `S001`, `STU12345`).

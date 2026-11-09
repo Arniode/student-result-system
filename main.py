@@ -16,6 +16,7 @@ from reports import (
     class_statistics,
     format_class_statistics,
     export_report,
+    export_csv,
     NoStudentsError,
 )
 
@@ -383,6 +384,19 @@ def export_report_menu(students):
         print(f"Could not write report: {exc}")
 
 
+def export_csv_menu(students):
+    """Prompt for a filename and export the records as CSV."""
+    filename = input("CSV filename [class_report.csv]: ").strip()
+    filename = filename or "class_report.csv"
+    try:
+        path = export_csv(students, filename)
+        print(f"CSV exported to:\n  {path}")
+    except NoStudentsError:
+        print("No student records to export.")
+    except OSError as exc:
+        print(f"Could not write CSV file: {exc}")
+
+
 def sort_and_statistics(students):
     """Sort students and display class statistics."""
     if not students:
@@ -398,6 +412,7 @@ def sort_and_statistics(students):
         print("  3. Sort by student ID")
         print("  4. View class statistics")
         print("  5. Export full report to text file")
+        print("  6. Export records to CSV file")
         print("  0. Back")
 
         choice = prompt_int("Choice: ")
@@ -426,6 +441,10 @@ def sort_and_statistics(students):
         elif choice == 5:
             print()
             export_report_menu(students)
+            print()
+        elif choice == 6:
+            print()
+            export_csv_menu(students)
             print()
         else:
             print("Invalid choice.")
