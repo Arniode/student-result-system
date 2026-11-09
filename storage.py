@@ -40,19 +40,20 @@ def load_students():
     except (json.JSONDecodeError, OSError) as exc:
         print(f"[storage] Error reading {DATA_FILE}: {exc}")
         return []
+    else:
+        # The else clause runs only when the file was read and parsed cleanly.
+        if not isinstance(raw_data, list):
+            print("[storage] Warning: data file is not a list; starting empty.")
+            return []
 
-    if not isinstance(raw_data, list):
-        print("[storage] Warning: data file is not a list; starting empty.")
-        return []
-
-    students = []
-    for item in raw_data:
-        # Skip malformed records instead of failing the entire load.
-        try:
-            students.append(Student.from_dict(item))
-        except (TypeError, ValueError, AttributeError) as exc:
-            print(f"[storage] Skipping malformed record: {exc}")
-    return students
+        students = []
+        for item in raw_data:
+            # Skip malformed records instead of failing the entire load.
+            try:
+                students.append(Student.from_dict(item))
+            except (TypeError, ValueError, AttributeError) as exc:
+                print(f"[storage] Skipping malformed record: {exc}")
+        return students
 
 
 def save_students(students):
@@ -75,12 +76,15 @@ def save_students(students):
         with open(tmp_file, "w", encoding="utf-8") as handle:
             json.dump(data, handle, indent=4, ensure_ascii=False)
         os.replace(tmp_file, DATA_FILE)
-        return True
     except OSError as exc:
         print(f"[storage] Error saving to {DATA_FILE}: {exc}")
-        try:
-            if os.path.exists(tmp_file):
-                os.remove(tmp_file)
-        except OSError:
-            pass
         return False
+    else:
+        return True
+    finally:
+        # Always clean up a leftover temporary file, success or failure.
+        if os.path.exists(tmp_file):
+            try:
+                os.remove(tmp_file)
+            except OSError:
+                pass
