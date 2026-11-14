@@ -109,9 +109,9 @@
     },
     {
         "student_id": "S007",
-        "full_name": "Fatima Yusuf",
+        "full_name": "Adediran Toluwanimi",
         "class_form": "Form 2A",
-        "gender": "Female",
+        "gender": "Male",
         "dob": "2010-02-14",
         "scores": {
             "Mathematics": 95,
