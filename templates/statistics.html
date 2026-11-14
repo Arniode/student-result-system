@@ -55,12 +55,12 @@
   </div>
 </div>
 
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;" class="two-col">
+<div class="two-col">
   <div class="card">
     <h3 style="margin-top:0;">Grade Distribution</h3>
     {% for grade, count in grade_counts.items() %}
     <div class="dist-row">
-      <div class="label" style="color: {{ 'var(--primary)' if grade in ['A','B','C','D','F'] else 'var(--muted)' }};">{{ grade }}</div>
+      <span class="badge {{ grade|grade_class }}" style="width:2.2rem;">{{ grade }}</span>
       <div class="track"><div style="width: {{ (count / stats['count'] * 100)|round(0) }}%;"></div></div>
       <div class="count">{{ count }}</div>
     </div>
@@ -92,10 +92,5 @@
     </table>
   </div>
 </div>
-
-<style>
-  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
-</style>
 
 {% endblock %}

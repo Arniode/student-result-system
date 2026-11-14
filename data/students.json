@@ -106,5 +106,113 @@
         "average": 38.8,
         "grade": "F",
         "date_added": "2026-11-14T09:40:00"
+    },
+    {
+        "student_id": "S007",
+        "full_name": "Fatima Yusuf",
+        "class_form": "Form 2A",
+        "gender": "Female",
+        "dob": "2010-02-14",
+        "scores": {
+            "Mathematics": 95,
+            "English": 90,
+            "Physics": 92,
+            "Chemistry": 88,
+            "Biology": 91
+        },
+        "total": 456,
+        "average": 91.2,
+        "grade": "A",
+        "date_added": "2026-11-14T10:00:00"
+    },
+    {
+        "student_id": "S008",
+        "full_name": "Emeka Nwankwo",
+        "class_form": "Form 1A",
+        "gender": "Male",
+        "dob": "2011-05-19",
+        "scores": {
+            "Mathematics": 70,
+            "English": 74,
+            "Physics": 66,
+            "Chemistry": 72,
+            "Biology": 68
+        },
+        "total": 350,
+        "average": 70.0,
+        "grade": "A",
+        "date_added": "2026-11-14T10:05:00"
+    },
+    {
+        "student_id": "S009",
+        "full_name": "Halima Abdullahi",
+        "class_form": "Form 2B",
+        "gender": "Female",
+        "dob": "2010-08-03",
+        "scores": {
+            "Mathematics": 62,
+            "English": 65,
+            "Physics": 60,
+            "Chemistry": 58,
+            "Biology": 63
+        },
+        "total": 308,
+        "average": 61.6,
+        "grade": "B",
+        "date_added": "2026-11-14T10:10:00"
+    },
+    {
+        "student_id": "S010",
+        "full_name": "David Adebayo",
+        "class_form": "Form 1B",
+        "gender": "Male",
+        "dob": "2011-01-27",
+        "scores": {
+            "Mathematics": 54,
+            "English": 57,
+            "Physics": 50,
+            "Chemistry": 55,
+            "Biology": 49
+        },
+        "total": 265,
+        "average": 53.0,
+        "grade": "C",
+        "date_added": "2026-11-14T10:15:00"
+    },
+    {
+        "student_id": "S011",
+        "full_name": "Mary Johnson",
+        "class_form": "Form 2A",
+        "gender": "Female",
+        "dob": "2010-11-11",
+        "scores": {
+            "Mathematics": 45,
+            "English": 48,
+            "Physics": 44,
+            "Chemistry": 42,
+            "Biology": 46
+        },
+        "total": 225,
+        "average": 45.0,
+        "grade": "D",
+        "date_added": "2026-11-14T10:20:00"
+    },
+    {
+        "student_id": "S012",
+        "full_name": "Ishaq Bola",
+        "class_form": "Form 1A",
+        "gender": "Male",
+        "dob": "2011-07-07",
+        "scores": {
+            "Mathematics": 38,
+            "English": 41,
+            "Physics": 35,
+            "Chemistry": 40,
+            "Biology": 33
+        },
+        "total": 187,
+        "average": 37.4,
+        "grade": "F",
+        "date_added": "2026-11-14T10:25:00"
     }
 ]
