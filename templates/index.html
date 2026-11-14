@@ -68,22 +68,27 @@
 <div class="card">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
     <h2 style="margin:0;">Students</h2>
-    <form method="get" action="{{ url_for('search') }}" style="display:flex; gap:.5rem; min-width:260px; flex:1; max-width:360px;">
-      <input type="text" name="q" placeholder="Search by name or ID…"
-             style="flex:1; padding:.55rem .85rem; border:1px solid var(--border); border-radius:10px; font-size:.9rem;">
-      <button class="btn btn-primary btn-sm" type="submit">Search</button>
-    </form>
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="table-search" type="text" placeholder="Search by name or ID…" autocomplete="off">
+    </div>
   </div>
 
   {% if students %}
   <div class="table-wrap" style="margin-top:1rem;">
-    <table>
+    <table id="students-table">
       <thead>
-        <tr><th>Student</th><th>Average</th><th>Grade</th><th style="text-align:right;">Actions</th></tr>
+        <tr>
+          <th data-sort="name">Student</th>
+          <th data-sort="avg">Average</th>
+          <th data-sort="grade">Grade</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
       </thead>
       <tbody>
         {% for s in students %}
-        <tr>
+        <tr data-name="{{ s.full_name|lower }}" data-id="{{ s.student_id|lower }}"
+            data-avg="{{ s.average|round(2) }}" data-grade="{{ s.grade or 'N/A' }}">
           <td>
             <div class="cell-user">
               <span class="avatar">{{ s.full_name|initials }}</span>
@@ -119,5 +124,46 @@
   </div>
   {% endif %}
 </div>
+
+<script>
+  (function () {
+    var search = document.getElementById('table-search');
+    search.addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      document.querySelectorAll('#students-table tbody tr').forEach(function (row) {
+        var hay = (row.dataset.name || '') + ' ' + (row.dataset.id || '');
+        row.style.display = hay.indexOf(q) !== -1 ? '' : 'none';
+      });
+    });
+
+    var gradeRank = { A: 1, B: 2, C: 3, D: 4, F: 5, 'N/A': 6 };
+    var sortKey = null, sortDir = 1;
+    var headers = document.querySelectorAll('#students-table th[data-sort]');
+    headers.forEach(function (th) {
+      th.addEventListener('click', function () {
+        var key = th.getAttribute('data-sort');
+        sortDir = (sortKey === key) ? sortDir * -1 : 1;
+        sortKey = key;
+
+        var rows = Array.prototype.slice.call(
+          document.querySelectorAll('#students-table tbody tr'));
+        rows.sort(function (a, b) {
+          var av, bv;
+          if (key === 'name') { av = (a.dataset.name || ''); bv = (b.dataset.name || ''); }
+          else if (key === 'avg') { av = parseFloat(a.dataset.avg) || 0; bv = parseFloat(b.dataset.avg) || 0; }
+          else if (key === 'grade') { av = gradeRank[a.dataset.grade] ?? 9; bv = gradeRank[b.dataset.grade] ?? 9; }
+          if (av < bv) return -1 * sortDir;
+          if (av > bv) return 1 * sortDir;
+          return 0;
+        });
+        var tbody = document.querySelector('#students-table tbody');
+        rows.forEach(function (r) { tbody.appendChild(r); });
+
+        headers.forEach(function (h) { h.classList.remove('sorted-asc', 'sorted-desc'); });
+        th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+      });
+    });
+  })();
+</script>
 
 {% endblock %}

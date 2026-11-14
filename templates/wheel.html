@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Lucky Wheel{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Lucky Wheel</h1>
+    <p class="muted">Give it a spin and pick a random student of the class.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('index') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<div class="card" style="text-align:center;">
+  {% if students %}
+  <div class="wheel-stage">
+    <div class="wheel-pointer"></div>
+    <div id="wheel" class="wheel"></div>
+  </div>
+
+  <button id="spin-btn" class="btn btn-primary" type="button" style="font-size:1rem; padding:.7rem 1.6rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+    Spin the Wheel
+  </button>
+
+  <div id="wheel-result" class="wheel-result" hidden>
+    <span id="w-avatar" class="avatar lg"></span>
+    <div class="info">
+      <div class="user-name" id="w-name" style="font-size:1.1rem;"></div>
+      <div class="user-sub muted" id="w-sub"></div>
+    </div>
+    <div class="result-right">
+      <div class="stat-value" id="w-avg" style="font-size:1.6rem;"></div>
+      <span id="w-badge" class="badge"></span>
+    </div>
+  </div>
+  {% else %}
+  <div style="padding:2rem 1rem;">
+    <h3>No students to spin yet</h3>
+    <p class="muted">Add some students first, then come back for a spin.</p>
+    <a class="btn btn-primary" href="{{ url_for('add_student_page') }}">+ Add Student</a>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .wheel-stage { position: relative; width: 320px; height: 320px; margin: 1rem auto; }
+  .wheel { width: 100%; height: 100%; will-change: transform; }
+  .wheel svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 26px rgba(0,0,0,.25)); }
+  .wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); z-index: 3;
+                   width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent;
+                   border-top: 28px solid #ef4444; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); }
+  .wheel-result { display: flex; align-items: center; gap: 1rem; text-align: left;
+                  max-width: 480px; margin: 1.5rem auto 0; padding: 1rem 1.25rem;
+                  background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px;
+                  animation: popIn .4s cubic-bezier(.2,.9,.3,1.3) both; }
+  .wheel-result .info { flex: 1; }
+  .wheel-result .result-right { text-align: right; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.9) translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+
+<script>
+  (function () {
+    var STUDENTS = {{ wheel_students|tojson }};
+    var N = STUDENTS.length;
+    if (N > 0) {
+      var NS = 'http://www.w3.org/2000/svg';
+      var SIZE = 320, C = SIZE / 2, R = 150;
+      var PALETTE = ['#6366f1','#8b5cf6','#14b8a6','#f59e0b','#ec4899','#0ea5e9',
+                     '#84cc16','#f97316','#a855f7','#10b981','#38bdf8','#eab308'];
+      var GRADE_CLASS = { A: 'grade-a', B: 'grade-b', C: 'grade-c', D: 'grade-d', F: 'grade-f' };
+      var seg = 360 / N;
+
+      function pt(angleDeg, radius) {
+        var rad = (angleDeg - 90) * Math.PI / 180;
+        return [C + radius * Math.cos(rad), C + radius * Math.sin(rad)];
+      }
+
+      function buildWheel() {
+        var svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 ' + SIZE + ' ' + SIZE);
+
+        var outer = document.createElementNS(NS, 'circle');
+        outer.setAttribute('cx', C); outer.setAttribute('cy', C); outer.setAttribute('r', R);
+        outer.setAttribute('fill', '#111827');
+        outer.setAttribute('stroke', 'rgba(255,255,255,.16)');
+        outer.setAttribute('stroke-width', '4');
+        svg.appendChild(outer);
+
+        for (var i = 0; i < N; i++) {
+          var a1 = i * seg, a2 = (i + 1) * seg;
+          var p1 = pt(a1, R), p2 = pt(a2, R);
+          var path = document.createElementNS(NS, 'path');
+          path.setAttribute('d', 'M ' + C + ' ' + C + ' L ' + p1[0] + ' ' + p1[1] +
+                            ' A ' + R + ' ' + R + ' 0 0 1 ' + p2[0] + ' ' + p2[1] + ' Z');
+          path.setAttribute('fill', PALETTE[i % PALETTE.length]);
+          path.setAttribute('stroke', 'rgba(255,255,255,.45)');
+          path.setAttribute('stroke-width', '1.5');
+          svg.appendChild(path);
+
+          var mid = (a1 + a2) / 2;
+          var lp = pt(mid, R * 0.6);
+          var text = document.createElementNS(NS, 'text');
+          text.setAttribute('x', lp[0]); text.setAttribute('y', lp[1]);
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('dominant-baseline', 'middle');
+          text.setAttribute('font-size', N > 8 ? '11' : '14');
+          text.setAttribute('font-weight', '700');
+          text.setAttribute('fill', '#ffffff');
+          text.textContent = STUDENTS[i].first;
+          svg.appendChild(text);
+        }
+
+        var hub = document.createElementNS(NS, 'circle');
+        hub.setAttribute('cx', C); hub.setAttribute('cy', C); hub.setAttribute('r', 20);
+        hub.setAttribute('fill', '#0b1220');
+        hub.setAttribute('stroke', 'rgba(255,255,255,.5)');
+        hub.setAttribute('stroke-width', '3');
+        svg.appendChild(hub);
+
+        document.getElementById('wheel').appendChild(svg);
+      }
+
+      var wheelEl = document.getElementById('wheel');
+      var spinBtn = document.getElementById('spin-btn');
+      var resultEl = document.getElementById('wheel-result');
+      var rotation = 0, winner = null;
+
+      function showResult() {
+        document.getElementById('w-avatar').textContent = winner.initials;
+        document.getElementById('w-name').textContent = winner.full_name;
+        document.getElementById('w-sub').textContent = winner.student_id + ' · spun by the lucky wheel';
+        document.getElementById('w-avg').textContent = winner.average;
+        var badge = document.getElementById('w-badge');
+        badge.textContent = winner.grade;
+        badge.className = 'badge ' + (GRADE_CLASS[winner.grade] || 'grade-na');
+        resultEl.hidden = false;
+      }
+
+      spinBtn.addEventListener('click', function () {
+        if (N < 2) return;
+        var w = Math.floor(Math.random() * N);
+        winner = STUDENTS[w];
+        var aW = w * seg + seg / 2;
+        var cur = rotation % 360;
+        var delta = (360 - ((aW + cur) % 360)) % 360;
+        rotation += delta + 360 * 5;
+
+        resultEl.hidden = true;
+        spinBtn.disabled = true;
+        wheelEl.style.transition = 'transform 4.5s cubic-bezier(.15,.85,.25,1)';
+        wheelEl.style.transform = 'rotate(' + rotation + 'deg)';
+      });
+
+      wheelEl.addEventListener('transitionend', function () {
+        spinBtn.disabled = false;
+        if (winner) showResult();
+      });
+
+      buildWheel();
+    }
+  })();
+</script>
+
+{% endblock %}

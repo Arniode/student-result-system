@@ -242,6 +242,24 @@ def statistics():
                            grade_counts=grade_counts)
 
 
+@app.route("/wheel")
+def wheel():
+    students = load_students()
+    wheel_students = [
+        {
+            "first": s.full_name.split()[0],
+            "full_name": s.full_name,
+            "student_id": s.student_id,
+            "average": round(s.average, 1) if s.average is not None else None,
+            "grade": s.grade or "N/A",
+            "initials": _initials(s.full_name),
+        }
+        for s in students
+    ]
+    return render_template("wheel.html", students=students,
+                           wheel_students=wheel_students)
+
+
 @app.route("/export.csv")
 def export_csv():
     students = load_students()

@@ -58,13 +58,9 @@
 <div class="two-col">
   <div class="card">
     <h3 style="margin-top:0;">Grade Distribution</h3>
-    {% for grade, count in grade_counts.items() %}
-    <div class="dist-row">
-      <span class="badge {{ grade|grade_class }}" style="width:2.2rem;">{{ grade }}</span>
-      <div class="track"><div style="width: {{ (count / stats['count'] * 100)|round(0) }}%;"></div></div>
-      <div class="count">{{ count }}</div>
+    <div style="position:relative; height:260px; margin-top:.5rem;">
+      <canvas id="gradeChart"></canvas>
     </div>
-    {% endfor %}
   </div>
 
   <div class="card">
@@ -92,5 +88,36 @@
     </table>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var gc = {{ grade_counts|tojson }};
+    var order = ['A', 'B', 'C', 'D', 'F', 'N/A'];
+    var labels = order.filter(function (g) { return g in gc; });
+    var pal = { A: '#10b981', B: '#3b82f6', C: '#f59e0b', D: '#f97316', F: '#ef4444', 'N/A': '#94a3b8' };
+    var data = labels.map(function (g) { return gc[g]; });
+    var colors = labels.map(function (g) { return pal[g]; });
+
+    if (window.Chart) {
+      var cs = getComputedStyle(document.documentElement);
+      var muted = cs.getPropertyValue('--muted').trim() || '#94a3b8';
+      var border = cs.getPropertyValue('--border').trim() || '#e6e8f0';
+      new Chart(document.getElementById('gradeChart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderRadius: 8, borderSkipped: false }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: muted, font: { weight: '700' } }, grid: { display: false } },
+            y: { ticks: { color: muted, precision: 0, stepSize: 1 }, grid: { color: border, borderDash: [4, 4] }, beginAtZero: true }
+          }
+        }
+      });
+    }
+  })();
+</script>
 
 {% endblock %}
