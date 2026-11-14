@@ -43,6 +43,37 @@ def _grade_class(grade):
 app.add_template_filter(_initials, "initials")
 app.add_template_filter(_grade_class, "grade_class")
 
+
+def _ordinal(n):
+    """Return an ordinal string, e.g. 1 -> '1st', 2 -> '2nd', 12 -> '12th'."""
+    n = int(n)
+    if 10 <= n % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def _rank_map(students):
+    """Map a lowercase student ID to its 1-based position by average score."""
+    ranked = sort_students(students, "average")
+    return {s.student_id.lower(): i + 1 for i, s in enumerate(ranked)}
+
+
+def _subject_averages(students):
+    """Return {subject: average} across all recorded scores."""
+    totals = {subject: [] for subject in SUBJECTS}
+    for student in students:
+        for subject in SUBJECTS:
+            score = student.scores.get(subject)
+            if score is not None:
+                totals[subject].append(score)
+    return {subject: (round(sum(vals) / len(vals), 1) if vals else 0)
+            for subject, vals in totals.items()}
+
+
+app.add_template_filter(_ordinal, "ordinal")
+
 ID_PATTERN = re.compile(r"^[A-Za-z]{1,5}\d{1,6}$")
 
 
@@ -86,7 +117,10 @@ def parse_scores(form):
 def index():
     students = load_students()
     stats = class_statistics(students) if students else None
-    return render_template("index.html", students=students, stats=stats)
+    ranks = _rank_map(students) if students else {}
+    classes = sorted({s.class_form for s in students})
+    return render_template("index.html", students=students, stats=stats,
+                           ranks=ranks, classes=classes)
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -141,12 +175,15 @@ def add_student_page():
 
 @app.route("/student/<sid>")
 def student_detail(sid):
-    student = find_by_id(load_students(), sid)
+    students = load_students()
+    student = find_by_id(students, sid)
     if student is None:
         flash("Student not found.", "error")
         return redirect(url_for("index"))
+    ranks = _rank_map(students)
     return render_template("student_detail.html", student=student,
-                           report=format_report_card(student))
+                           report=format_report_card(student),
+                           ranks=ranks, total=len(students))
 
 
 @app.route("/student/<sid>/edit", methods=["GET", "POST"])
@@ -238,8 +275,12 @@ def statistics():
     for student in students:
         grade = student.grade or "N/A"
         grade_counts[grade] = grade_counts.get(grade, 0) + 1
+    subject_averages = [[subject, avg]
+                        for subject, avg in _subject_averages(students).items()]
+    ranks = _rank_map(students)
     return render_template("statistics.html", stats=stats, ranked=ranked,
-                           grade_counts=grade_counts)
+                           grade_counts=grade_counts,
+                           subject_averages=subject_averages, ranks=ranks)
 
 
 @app.route("/wheel")

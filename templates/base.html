@@ -182,10 +182,25 @@
     .btn-sm { padding: .35rem .7rem; font-size: .82rem; border-radius: 8px; }
 
     /* ---------- Flash / alert ---------- */
-    .flash { display: flex; align-items: center; gap: .6rem; padding: .8rem 1rem; border-radius: 10px;
-             margin-bottom: 1.25rem; font-weight: 500; border: 1px solid transparent; }
-    .flash.success { background: var(--green-soft); border-color: transparent; color: var(--green-fg); }
-    .flash.error { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+    /* ---------- Toast notifications ---------- */
+    .flash { position: fixed; top: 76px; right: 1.25rem; z-index: 90; max-width: 380px;
+             display: flex; align-items: center; gap: .6rem; padding: .8rem 1rem; border-radius: 12px;
+             font-weight: 500; background: var(--surface); border: 1px solid var(--border);
+             border-left: 4px solid var(--primary); box-shadow: var(--shadow);
+             animation: slideIn .35s cubic-bezier(.2,.9,.3,1.2) both; transition: opacity .3s, transform .3s;
+             cursor: pointer; }
+    .flash.success { color: var(--green-fg); border-left-color: var(--green-fg); }
+    .flash.error { color: var(--danger); border-left-color: var(--danger); }
+    .flash.hide { opacity: 0; transform: translateX(24px); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- Rank badge ---------- */
+    .rank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.1rem;
+            height: 1.6rem; padding: 0 .5rem; border-radius: 8px; font-weight: 700; font-size: .82rem; }
+    .rank-1 { background: #fef3c7; color: #b45309; }
+    .rank-2 { background: #e2e8f0; color: #475569; }
+    .rank-3 { background: #f1c7a0; color: #9a3412; }
+    .rank-o { background: var(--surface-2); color: var(--muted); }
 
     /* ---------- Cards & stat tiles ---------- */
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
@@ -361,6 +376,17 @@
       root.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
     });
+
+    (function () {
+      function dismiss(el) {
+        el.classList.add('hide');
+        setTimeout(function () { el.remove(); }, 350);
+      }
+      document.querySelectorAll('.flash').forEach(function (el) {
+        var t = setTimeout(function () { dismiss(el); }, 4500);
+        el.addEventListener('click', function () { clearTimeout(t); dismiss(el); });
+      });
+    })();
   </script>
 </body>
 </html>

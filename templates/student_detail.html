@@ -58,6 +58,10 @@
       <div class="k">Grade</div>
       <div class="v">{{ student.grade or 'N/A' }}</div>
     </div>
+    <div class="detail-item">
+      <div class="k">Class Position</div>
+      <div class="v">{{ ranks.get(student.student_id|lower)|ordinal }} of {{ total }}</div>
+    </div>
   </div>
 
   <div class="section-label">Subject Scores</div>

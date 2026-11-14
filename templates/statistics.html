@@ -55,64 +55,124 @@
   </div>
 </div>
 
+<div class="podium">
+  {% set medals = ['gold', 'silver', 'bronze'] %}
+  {% for s in ranked[:3] %}
+  <div class="podium-card {{ medals[loop.index0] }}">
+    <div class="podium-rank">{{ loop.index }}</div>
+    <span class="avatar lg">{{ s.full_name|initials }}</span>
+    <div class="user-name" style="margin-top:.6rem;">{{ s.full_name }}</div>
+    <div class="muted" style="font-size:.8rem;">{{ s.student_id }} · {{ s.class_form }}</div>
+    <div class="podium-avg">{{ s.average|round(1) }}</div>
+    <span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span>
+  </div>
+  {% endfor %}
+</div>
+
 <div class="two-col">
   <div class="card">
-    <h3 style="margin-top:0;">Grade Distribution</h3>
-    <div style="position:relative; height:260px; margin-top:.5rem;">
-      <canvas id="gradeChart"></canvas>
+    <h3 style="margin-top:0;">Subject Performance</h3>
+    <p class="muted" style="margin:0 0 .75rem;">Class average in each subject.</p>
+    <div style="position:relative; height:240px;">
+      <canvas id="subjectChart"></canvas>
     </div>
   </div>
 
   <div class="card">
-    <h3 style="margin-top:0;">Leaderboard</h3>
-    <table>
-      <thead><tr><th>#</th><th>Student</th><th style="text-align:right;">Average</th><th style="text-align:right;">Grade</th></tr></thead>
-      <tbody>
-        {% for s in ranked %}
-        <tr>
-          <td class="muted" style="font-weight:700;">{{ loop.index }}</td>
-          <td>
-            <div class="cell-user">
-              <span class="avatar" style="width:32px;height:32px;font-size:.75rem;">{{ s.full_name|initials }}</span>
-              <div>
-                <div class="user-name">{{ s.full_name }}</div>
-                <div class="user-sub muted">{{ s.student_id }}</div>
-              </div>
-            </div>
-          </td>
-          <td class="num" style="text-align:right;">{{ s.average|round(1) }}</td>
-          <td style="text-align:right;"><span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <h3 style="margin-top:0;">Grade Distribution</h3>
+    <p class="muted" style="margin:0 0 .75rem;">Number of students per grade.</p>
+    <div style="position:relative; height:240px;">
+      <canvas id="gradeChart"></canvas>
+    </div>
   </div>
 </div>
+
+<div class="card" style="margin-top:1rem;">
+  <h3 style="margin-top:0;">Leaderboard</h3>
+  <table>
+    <thead><tr><th></th><th>Student</th><th style="text-align:right;">Average</th><th style="text-align:right;">Grade</th></tr></thead>
+    <tbody>
+      {% for s in ranked %}
+      <tr>
+        <td><span class="rank {{ 'rank-1' if loop.index == 1 else ('rank-2' if loop.index == 2 else ('rank-3' if loop.index == 3 else 'rank-o')) }}">{{ loop.index|ordinal }}</span></td>
+        <td>
+          <div class="cell-user">
+            <span class="avatar" style="width:32px;height:32px;font-size:.75rem;">{{ s.full_name|initials }}</span>
+            <div>
+              <div class="user-name">{{ s.full_name }}</div>
+              <div class="user-sub muted">{{ s.student_id }} · {{ s.class_form }}</div>
+            </div>
+          </div>
+        </td>
+        <td class="num" style="text-align:right;">{{ s.average|round(1) }}</td>
+        <td style="text-align:right;"><span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .podium-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+                 padding: 1.5rem 1rem 1.25rem; text-align: center; position: relative; box-shadow: var(--shadow-sm); }
+  .podium-card.gold { border-top: 4px solid #f59e0b; }
+  .podium-card.silver { border-top: 4px solid #94a3b8; }
+  .podium-card.bronze { border-top: 4px solid #d97706; }
+  .podium-rank { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px;
+                 border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 800;
+                 font-family: 'Sora', sans-serif; background: #94a3b8; box-shadow: var(--shadow-sm); }
+  .podium-card.gold .podium-rank { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+  .podium-card.silver .podium-rank { background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
+  .podium-card.bronze .podium-rank { background: linear-gradient(135deg, #fb923c, #d97706); }
+  .podium-avg { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 800; margin: .35rem 0 .35rem; }
+  @media (max-width: 700px) { .podium { grid-template-columns: 1fr; } }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   (function () {
-    var gc = {{ grade_counts|tojson }};
-    var order = ['A', 'B', 'C', 'D', 'F', 'N/A'];
-    var labels = order.filter(function (g) { return g in gc; });
+    var cs = getComputedStyle(document.documentElement);
+    var muted = cs.getPropertyValue('--muted').trim() || '#94a3b8';
+    var border = cs.getPropertyValue('--border').trim() || '#e6e8f0';
+
     var pal = { A: '#10b981', B: '#3b82f6', C: '#f59e0b', D: '#f97316', F: '#ef4444', 'N/A': '#94a3b8' };
-    var data = labels.map(function (g) { return gc[g]; });
-    var colors = labels.map(function (g) { return pal[g]; });
 
     if (window.Chart) {
-      var cs = getComputedStyle(document.documentElement);
-      var muted = cs.getPropertyValue('--muted').trim() || '#94a3b8';
-      var border = cs.getPropertyValue('--border').trim() || '#e6e8f0';
+      var gc = {{ grade_counts|tojson }};
+      var order = ['A', 'B', 'C', 'D', 'F', 'N/A'];
+      var labels = order.filter(function (g) { return g in gc; });
+      var data = labels.map(function (g) { return gc[g]; });
+      var colors = labels.map(function (g) { return pal[g]; });
+
       new Chart(document.getElementById('gradeChart'), {
         type: 'bar',
         data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderRadius: 8, borderSkipped: false }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
             x: { ticks: { color: muted, font: { weight: '700' } }, grid: { display: false } },
             y: { ticks: { color: muted, precision: 0, stepSize: 1 }, grid: { color: border, borderDash: [4, 4] }, beginAtZero: true }
+          }
+        }
+      });
+
+      var sa = {{ subject_averages|tojson }};
+      var subjLabels = sa.map(function (x) { return x[0]; });
+      var subjData = sa.map(function (x) { return x[1]; });
+      var subjPalette = ['#6366f1', '#8b5cf6', '#14b8a6', '#f59e0b', '#ec4899'];
+
+      new Chart(document.getElementById('subjectChart'), {
+        type: 'bar',
+        data: { labels: subjLabels, datasets: [{ data: subjData, backgroundColor: subjPalette, borderRadius: 8, borderSkipped: false }] },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: muted }, grid: { color: border, borderDash: [4, 4] }, max: 100 },
+            y: { ticks: { color: muted, font: { weight: '600' } }, grid: { display: false } }
           }
         }
       });

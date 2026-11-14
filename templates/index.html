@@ -68,9 +68,15 @@
 <div class="card">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
     <h2 style="margin:0;">Students</h2>
-    <div class="search-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="table-search" type="text" placeholder="Search by name or ID…" autocomplete="off">
+    <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;">
+      <select id="class-filter" class="class-select" aria-label="Filter by class">
+        <option value="">All classes</option>
+        {% for c in classes %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="table-search" type="text" placeholder="Search by name or ID…" autocomplete="off">
+      </div>
     </div>
   </div>
 
@@ -79,6 +85,7 @@
     <table id="students-table">
       <thead>
         <tr>
+          <th data-sort="rank">Rank</th>
           <th data-sort="name">Student</th>
           <th data-sort="avg">Average</th>
           <th data-sort="grade">Grade</th>
@@ -87,8 +94,11 @@
       </thead>
       <tbody>
         {% for s in students %}
+        {% set r = ranks.get(s.student_id|lower) %}
         <tr data-name="{{ s.full_name|lower }}" data-id="{{ s.student_id|lower }}"
+            data-class="{{ s.class_form }}" data-rank="{{ r if r else 999 }}"
             data-avg="{{ s.average|round(2) }}" data-grade="{{ s.grade or 'N/A' }}">
+          <td><span class="rank {{ 'rank-1' if r == 1 else ('rank-2' if r == 2 else ('rank-3' if r == 3 else 'rank-o')) }}">{{ r|ordinal if r else '—' }}</span></td>
           <td>
             <div class="cell-user">
               <span class="avatar">{{ s.full_name|initials }}</span>
@@ -128,13 +138,20 @@
 <script>
   (function () {
     var search = document.getElementById('table-search');
-    search.addEventListener('input', function () {
-      var q = this.value.trim().toLowerCase();
+    var classSel = document.getElementById('class-filter');
+
+    function applyFilters() {
+      var q = search.value.trim().toLowerCase();
+      var cls = classSel.value;
       document.querySelectorAll('#students-table tbody tr').forEach(function (row) {
         var hay = (row.dataset.name || '') + ' ' + (row.dataset.id || '');
-        row.style.display = hay.indexOf(q) !== -1 ? '' : 'none';
+        var okName = hay.indexOf(q) !== -1;
+        var okClass = !cls || row.dataset.class === cls;
+        row.style.display = (okName && okClass) ? '' : 'none';
       });
-    });
+    }
+    search.addEventListener('input', applyFilters);
+    classSel.addEventListener('change', applyFilters);
 
     var gradeRank = { A: 1, B: 2, C: 3, D: 4, F: 5, 'N/A': 6 };
     var sortKey = null, sortDir = 1;
@@ -145,18 +162,18 @@
         sortDir = (sortKey === key) ? sortDir * -1 : 1;
         sortKey = key;
 
-        var rows = Array.prototype.slice.call(
-          document.querySelectorAll('#students-table tbody tr'));
+        var tbody = document.querySelector('#students-table tbody');
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
         rows.sort(function (a, b) {
           var av, bv;
           if (key === 'name') { av = (a.dataset.name || ''); bv = (b.dataset.name || ''); }
           else if (key === 'avg') { av = parseFloat(a.dataset.avg) || 0; bv = parseFloat(b.dataset.avg) || 0; }
+          else if (key === 'rank') { av = parseInt(a.dataset.rank) || 999; bv = parseInt(b.dataset.rank) || 999; }
           else if (key === 'grade') { av = gradeRank[a.dataset.grade] ?? 9; bv = gradeRank[b.dataset.grade] ?? 9; }
           if (av < bv) return -1 * sortDir;
           if (av > bv) return 1 * sortDir;
           return 0;
         });
-        var tbody = document.querySelector('#students-table tbody');
         rows.forEach(function (r) { tbody.appendChild(r); });
 
         headers.forEach(function (h) { h.classList.remove('sorted-asc', 'sorted-desc'); });
@@ -188,6 +205,9 @@
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, .5); }
                      70% { box-shadow: 0 0 0 16px rgba(124, 58, 237, 0); }
                      100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); } }
+
+  .class-select { padding: .55rem .65rem; border: 1px solid var(--border); border-radius: 10px;
+                  background: var(--surface); color: var(--text); font-size: .9rem; font-family: inherit; }
 </style>
 
 <div id="wheel-modal" class="wheel-modal" hidden>
