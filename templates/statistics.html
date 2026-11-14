@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Statistics{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Class Statistics</h2>
+  <pre>{{ stats }}</pre>
+  <p><a class="btn" href="{{ url_for('index') }}">Back</a></p>
+</div>
+{% endblock %}

@@ -57,6 +57,36 @@ python main.py
 > from the parent folder — the data file location is resolved relative to the
 > module, not the current working directory.
 
+## Web Interface (optional)
+
+The project also ships a Flask web UI (`app.py` + `templates/`) that reuses the
+same `student.py`, `results.py`, `storage.py` and `reports.py` modules so the
+system can be hosted as a live website.
+
+Run it locally:
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Then open <http://127.0.0.1:5000>.
+
+### Deploying to Render (free)
+
+1. Push this repository to GitHub.
+2. Go to <https://render.com> and sign in with GitHub (no card required).
+3. Click **New** → **Blueprint**, select the repository, and confirm.
+   Render reads `render.yaml` and creates a free web service automatically.
+4. After a few minutes you will get a live URL like
+   `https://student-result-system.onrender.com` — use this as your
+   hosting/live-project link.
+
+> Note: the free tier puts the service to sleep after ~15 minutes of
+> inactivity, so the first visit may take ~30–50 seconds to wake up. Also, the
+> JSON data file is stored on the instance's ephemeral disk, so data resets on
+> redeploy — the CLI version keeps permanent local storage.
+
 ## Menu Reference
 
 | Option | Description                                       |
