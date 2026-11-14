@@ -26,6 +26,23 @@ from student import Student
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "srms-demo-secret")
 
+
+def _initials(name):
+    """Return up to two initials (e.g. 'Jane Doe' -> 'JD')."""
+    parts = name.split()
+    return "".join(p[0].upper() for p in parts[:2]) or "?"
+
+
+def _grade_class(grade):
+    """Map a grade letter to a CSS modifier class for colour-coding."""
+    mapping = {"A": "grade-a", "B": "grade-b", "C": "grade-c",
+               "D": "grade-d", "F": "grade-f"}
+    return mapping.get((grade or "").upper(), "grade-na")
+
+
+app.add_template_filter(_initials, "initials")
+app.add_template_filter(_grade_class, "grade_class")
+
 ID_PATTERN = re.compile(r"^[A-Za-z]{1,5}\d{1,6}$")
 
 
@@ -68,7 +85,8 @@ def parse_scores(form):
 @app.route("/")
 def index():
     students = load_students()
-    return render_template("index.html", students=students)
+    stats = class_statistics(students) if students else None
+    return render_template("index.html", students=students, stats=stats)
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -214,8 +232,14 @@ def statistics():
     if not students:
         flash("No students registered yet.", "error")
         return redirect(url_for("index"))
-    stats = format_class_statistics(class_statistics(students))
-    return render_template("statistics.html", stats=stats)
+    stats = class_statistics(students)
+    ranked = sort_students(students, "average")
+    grade_counts = {}
+    for student in students:
+        grade = student.grade or "N/A"
+        grade_counts[grade] = grade_counts.get(grade, 0) + 1
+    return render_template("statistics.html", stats=stats, ranked=ranked,
+                           grade_counts=grade_counts)
 
 
 @app.route("/export.csv")

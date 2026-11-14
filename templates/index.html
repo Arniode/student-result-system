@@ -1,42 +1,123 @@
 {% extends "base.html" %}
-{% block title %}Students{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="muted">Manage student records, grades and class performance at a glance.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('export_csv') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      Export CSV
+    </a>
+    <a class="btn btn-outline" href="{{ url_for('export_text') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      Full Report
+    </a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon indigo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Total Students</div>
+      <div class="stat-value">{{ students|length }}</div>
+      <div class="stat-sub">registered records</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon violet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Class Average</div>
+      <div class="stat-value">{{ stats['class_average']|round(1) if stats else '—' }}</div>
+      <div class="stat-sub">across all subjects</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Highest Score</div>
+      <div class="stat-value">{{ stats['highest'].average|round(1) if stats else '—' }}</div>
+      <div class="stat-sub">{{ stats['highest'].full_name if stats else 'No data yet' }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon amber">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Lowest Score</div>
+      <div class="stat-value">{{ stats['lowest'].average|round(1) if stats else '—' }}</div>
+      <div class="stat-sub">{{ stats['lowest'].full_name if stats else 'No data yet' }}</div>
+    </div>
+  </div>
+</div>
+
 <div class="card">
-  <h2>All Students</h2>
-  <p>
-    <a class="btn" href="{{ url_for('add_student_page') }}">+ Add Student</a>
-    <a class="btn" href="{{ url_for('statistics') }}">Statistics</a>
-  </p>
-  <form method="get" action="{{ url_for('search') }}">
-    <input type="text" name="q" placeholder="Search by ID or name" style="max-width:300px; display:inline-block;">
-    <button class="btn" type="submit" style="display:inline-block;">Search</button>
-  </form>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+    <h2 style="margin:0;">Students</h2>
+    <form method="get" action="{{ url_for('search') }}" style="display:flex; gap:.5rem; min-width:260px; flex:1; max-width:360px;">
+      <input type="text" name="q" placeholder="Search by name or ID…"
+             style="flex:1; padding:.55rem .85rem; border:1px solid var(--border); border-radius:10px; font-size:.9rem;">
+      <button class="btn btn-primary btn-sm" type="submit">Search</button>
+    </form>
+  </div>
 
   {% if students %}
-  <table>
-    <tr>
-      <th>ID</th><th>Name</th><th>Class</th><th>Average</th>
-      <th>Grade</th><th>Actions</th>
-    </tr>
-    {% for s in students %}
-    <tr>
-      <td>{{ s.student_id }}</td>
-      <td><a href="{{ url_for('student_detail', sid=s.student_id) }}">{{ s.full_name }}</a></td>
-      <td>{{ s.class_form }}</td>
-      <td>{{ s.average }}</td>
-      <td>{{ s.grade if s.grade else 'N/A' }}</td>
-      <td>
-        <a class="btn small" href="{{ url_for('edit_student', sid=s.student_id) }}">Edit</a>
-        <form method="post" action="{{ url_for('delete_student', sid=s.student_id) }}"
-              style="display:inline" onsubmit="return confirm('Delete this student?');">
-          <button class="btn small danger" type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <div class="table-wrap" style="margin-top:1rem;">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Average</th><th>Grade</th><th style="text-align:right;">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>
+            <div class="cell-user">
+              <span class="avatar">{{ s.full_name|initials }}</span>
+              <div>
+                <div class="user-name">{{ s.full_name }}</div>
+                <div class="user-sub muted">{{ s.student_id }} · {{ s.class_form }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="num">{{ s.average|round(1) }}</td>
+          <td><span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span></td>
+          <td style="text-align:right; white-space:nowrap;">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('student_detail', sid=s.student_id) }}">View</a>
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('edit_student', sid=s.student_id) }}">Edit</a>
+            <form method="post" action="{{ url_for('delete_student', sid=s.student_id) }}"
+                  style="display:inline" onsubmit="return confirm('Delete {{ s.full_name }}?');">
+              <button class="btn btn-ghost btn-sm" type="submit" style="color:var(--danger);">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% else %}
-  <p>No students registered yet. Add the first one to get started.</p>
+  <div style="text-align:center; padding:3rem 1rem;">
+    <div style="color:var(--primary); margin-bottom:.5rem;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
+    </div>
+    <h3>No students yet</h3>
+    <p class="muted">Add your first student to populate the dashboard.</p>
+    <a class="btn btn-primary" href="{{ url_for('add_student_page') }}">+ Add Student</a>
+  </div>
   {% endif %}
 </div>
+
 {% endblock %}

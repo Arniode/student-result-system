@@ -1,56 +1,82 @@
 {% extends "base.html" %}
 {% block title %}{% if student %}Edit Student{% else %}Add Student{% endif %}{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>{% if student %}Edit {{ student.full_name }}{% else %}Add New Student{% endif %}</h2>
-  <form method="post">
-    {% if not student %}
-      <label>Student ID</label>
-      <input name="student_id" value="{{ values.get('student_id', '') }}"
-             placeholder="e.g. S001" required>
-    {% else %}
-      <p><strong>Student ID:</strong> {{ student.student_id }} (not editable)</p>
-    {% endif %}
 
-    <div class="grid">
-      <div>
-        <label>Full Name</label>
-        <input name="full_name" value="{{ values.get('full_name', '') }}" required>
+<div class="page-header">
+  <div>
+    <h1>{% if student %}Edit Student{% else %}Add New Student{% endif %}</h1>
+    <p class="muted">{% if student %}Update {{ student.full_name }}'s details and subject scores.{% else %}Register a student and record their five subject scores.{% endif %}</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('index') }}">Cancel</a>
+  </div>
+</div>
+
+<div class="card" style="max-width:760px;">
+  <form method="post">
+    <div class="section-label">Student Details</div>
+    <div class="form-grid">
+      {% if not student %}
+      <div class="field">
+        <label for="student_id">Student ID</label>
+        <input id="student_id" name="student_id" value="{{ values.get('student_id', '') }}"
+               placeholder="e.g. S001" required>
+        <div class="hint">1–5 letters followed by 1–6 digits.</div>
       </div>
-      <div>
-        <label>Class/Form</label>
-        <input name="class_form" value="{{ values.get('class_form', '') }}" required>
+      {% else %}
+      <div class="field">
+        <label>Student ID</label>
+        <div class="readonly-id">{{ student.student_id }}</div>
+        <div class="hint" style="margin-top:.35rem;">IDs cannot be changed.</div>
       </div>
-      <div>
-        <label>Gender</label>
-        <select name="gender">
+      {% endif %}
+
+      <div class="field">
+        <label for="full_name">Full Name</label>
+        <input id="full_name" name="full_name" value="{{ values.get('full_name', '') }}" required>
+      </div>
+
+      <div class="field">
+        <label for="class_form">Class / Form</label>
+        <input id="class_form" name="class_form" value="{{ values.get('class_form', '') }}"
+               placeholder="e.g. Form 3A" required>
+      </div>
+
+      <div class="field">
+        <label for="dob">Date of Birth</label>
+        <input id="dob" name="dob" value="{{ values.get('dob', '') }}" placeholder="YYYY-MM-DD" required>
+      </div>
+
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender">
           <option value="Male" {% if (values.get('gender') or 'Male') == 'Male' %}selected{% endif %}>Male</option>
           <option value="Female" {% if (values.get('gender') or 'Male') == 'Female' %}selected{% endif %}>Female</option>
           <option value="Other" {% if (values.get('gender') or 'Male') == 'Other' %}selected{% endif %}>Other</option>
         </select>
       </div>
-      <div>
-        <label>Date of Birth</label>
-        <input name="dob" value="{{ values.get('dob', '') }}" placeholder="YYYY-MM-DD" required>
-      </div>
     </div>
 
-    <h3>Scores ({{ min_score }} - {{ max_score }})</h3>
-    <div class="grid">
+    <div class="section-label">Subject Scores ({{ min_score }} – {{ max_score }})</div>
+    <div class="form-grid">
       {% for s in subjects %}
-      <div>
-        <label>{{ s }}</label>
-        <input name="{{ s }}" type="number" step="0.01"
+      <div class="field">
+        <label for="score-{{ loop.index }}">{{ s }}</label>
+        <input id="score-{{ loop.index }}" name="{{ s }}" type="number" step="0.01"
                min="{{ min_score }}" max="{{ max_score }}"
-               value="{{ values.get(s, '') }}" required>
+               value="{{ values.get(s, '') }}" placeholder="0 – 100" required>
       </div>
       {% endfor %}
     </div>
 
-    <p style="margin-top:1rem;">
-      <button class="btn" type="submit">Save</button>
-      <a class="btn" href="{{ url_for('index') }}">Cancel</a>
-    </p>
+    <div style="display:flex; gap:.6rem; margin-top:1rem;">
+      <button class="btn btn-primary" type="submit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        {% if student %}Save Changes{% else %}Save Student{% endif %}
+      </button>
+      <a class="btn btn-outline" href="{{ url_for('index') }}">Cancel</a>
+    </div>
   </form>
 </div>
+
 {% endblock %}

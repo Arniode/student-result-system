@@ -1,9 +1,101 @@
 {% extends "base.html" %}
 {% block title %}Statistics{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>Class Statistics</h2>
-  <pre>{{ stats }}</pre>
-  <p><a class="btn" href="{{ url_for('index') }}">Back</a></p>
+
+<div class="page-header">
+  <div>
+    <h1>Class Statistics</h1>
+    <p class="muted">Performance overview and ranking for the whole class.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('export_text') }}">Download Report</a>
+  </div>
 </div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon indigo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Students</div>
+      <div class="stat-value">{{ stats['count'] }}</div>
+      <div class="stat-sub">in this class</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon violet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Class Average</div>
+      <div class="stat-value">{{ stats['class_average']|round(1) }}</div>
+      <div class="stat-sub">mean average score</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Top Performer</div>
+      <div class="stat-value">{{ stats['highest'].average|round(1) }}</div>
+      <div class="stat-sub">{{ stats['highest'].full_name }}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div>
+      <div class="stat-label">Lowest</div>
+      <div class="stat-value">{{ stats['lowest'].average|round(1) }}</div>
+      <div class="stat-sub">{{ stats['lowest'].full_name }}</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;" class="two-col">
+  <div class="card">
+    <h3 style="margin-top:0;">Grade Distribution</h3>
+    {% for grade, count in grade_counts.items() %}
+    <div class="dist-row">
+      <div class="label" style="color: {{ 'var(--primary)' if grade in ['A','B','C','D','F'] else 'var(--muted)' }};">{{ grade }}</div>
+      <div class="track"><div style="width: {{ (count / stats['count'] * 100)|round(0) }}%;"></div></div>
+      <div class="count">{{ count }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Leaderboard</h3>
+    <table>
+      <thead><tr><th>#</th><th>Student</th><th style="text-align:right;">Average</th><th style="text-align:right;">Grade</th></tr></thead>
+      <tbody>
+        {% for s in ranked %}
+        <tr>
+          <td class="muted" style="font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <div class="cell-user">
+              <span class="avatar" style="width:32px;height:32px;font-size:.75rem;">{{ s.full_name|initials }}</span>
+              <div>
+                <div class="user-name">{{ s.full_name }}</div>
+                <div class="user-sub muted">{{ s.student_id }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="num" style="text-align:right;">{{ s.average|round(1) }}</td>
+          <td style="text-align:right;"><span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+
 {% endblock %}

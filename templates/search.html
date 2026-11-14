@@ -1,27 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Search: {{ query }}{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>Search results for "{{ query }}"</h2>
-  {% if results %}
-  <table>
-    <tr>
-      <th>ID</th><th>Name</th><th>Class</th><th>Average</th><th>Grade</th><th>Actions</th>
-    </tr>
-    {% for s in results %}
-    <tr>
-      <td>{{ s.student_id }}</td>
-      <td><a href="{{ url_for('student_detail', sid=s.student_id) }}">{{ s.full_name }}</a></td>
-      <td>{{ s.class_form }}</td>
-      <td>{{ s.average }}</td>
-      <td>{{ s.grade if s.grade else 'N/A' }}</td>
-      <td><a class="btn small" href="{{ url_for('edit_student', sid=s.student_id) }}">Edit</a></td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
-  <p>No matching students found.</p>
-  {% endif %}
-  <p><a class="btn" href="{{ url_for('index') }}">Back</a></p>
+
+<div class="page-header">
+  <div>
+    <h1>Search Results</h1>
+    <p class="muted">Showing matches for “{{ query }}”.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('index') }}">Back to Dashboard</a>
+  </div>
 </div>
+
+<div class="card">
+  <form method="get" action="{{ url_for('search') }}" style="display:flex; gap:.5rem; margin-bottom:1rem;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by name or ID…"
+           style="flex:1; padding:.55rem .85rem; border:1px solid var(--border); border-radius:10px; font-size:.9rem;">
+    <button class="btn btn-primary btn-sm" type="submit">Search</button>
+  </form>
+
+  {% if results %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Average</th><th>Grade</th><th style="text-align:right;">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for s in results %}
+        <tr>
+          <td>
+            <div class="cell-user">
+              <span class="avatar">{{ s.full_name|initials }}</span>
+              <div>
+                <div class="user-name">{{ s.full_name }}</div>
+                <div class="user-sub muted">{{ s.student_id }} · {{ s.class_form }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="num">{{ s.average|round(1) }}</td>
+          <td><span class="badge {{ s.grade|grade_class }}">{{ s.grade or 'N/A' }}</span></td>
+          <td style="text-align:right; white-space:nowrap;">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('student_detail', sid=s.student_id) }}">View</a>
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('edit_student', sid=s.student_id) }}">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center; padding:2.5rem 1rem;">
+    <h3>No matches found</h3>
+    <p class="muted">Try a different name or student ID.</p>
+  </div>
+  {% endif %}
+</div>
+
 {% endblock %}

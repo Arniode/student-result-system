@@ -1,16 +1,84 @@
 {% extends "base.html" %}
 {% block title %}{{ student.full_name }}{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>Report Card</h2>
-  <pre>{{ report }}</pre>
-  <p>
-    <a class="btn" href="{{ url_for('edit_student', sid=student.student_id) }}">Edit</a>
-    <form method="post" action="{{ url_for('delete_student', sid=student.student_id) }}"
-          style="display:inline" onsubmit="return confirm('Delete this student?');">
-      <button class="btn danger" type="submit">Delete</button>
-    </form>
-    <a class="btn" href="{{ url_for('index') }}">Back</a>
-  </p>
+
+<div class="page-header">
+  <div>
+    <h1>Student Report Card</h1>
+    <p class="muted">Full academic record for {{ student.full_name }}.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline" href="{{ url_for('index') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </a>
+    <a class="btn btn-primary" href="{{ url_for('edit_student', sid=student.student_id) }}">Edit</a>
+  </div>
 </div>
+
+<div class="card" style="max-width:760px;">
+  <div class="report-head">
+    <span class="avatar lg">{{ student.full_name|initials }}</span>
+    <div class="info">
+      <h2>{{ student.full_name }}</h2>
+      <div class="muted" style="font-size:.9rem;">{{ student.student_id }} · {{ student.class_form }}</div>
+    </div>
+    <div class="report-grade">
+      <span class="badge {{ student.grade|grade_class }}" style="font-size:1rem; height:2rem; min-width:2.4rem;">{{ student.grade or 'N/A' }}</span>
+      <div class="muted" style="font-size:.8rem; margin-top:.3rem;">Average {{ student.average|round(1) }}</div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="detail-item">
+      <div class="k">Gender</div>
+      <div class="v">{{ student.gender }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="k">Date of Birth</div>
+      <div class="v">{{ student.dob }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="k">Date Added</div>
+      <div class="v">{{ student.date_added.replace('T', ' ') }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="k">Total Score</div>
+      <div class="v">{{ student.total }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="k">Average</div>
+      <div class="v">{{ student.average|round(1) }}</div>
+    </div>
+    <div class="detail-item">
+      <div class="k">Grade</div>
+      <div class="v">{{ student.grade or 'N/A' }}</div>
+    </div>
+  </div>
+
+  <div class="section-label">Subject Scores</div>
+  <table>
+    <thead>
+      <tr><th>Subject</th><th>Performance</th><th style="text-align:right;">Score</th></tr>
+    </thead>
+    <tbody>
+      {% for subject, score in student.scores.items() %}
+      <tr>
+        <td style="font-weight:500;">{{ subject }}</td>
+        <td><div class="bar"><div class="bar-fill" style="width: {{ score if score is not none else 0 }}%;"></div></div></td>
+        <td class="num" style="text-align:right;">{{ '%g'|format(score) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="display:flex; gap:.6rem; margin-top:1.25rem;">
+    <a class="btn btn-primary" href="{{ url_for('edit_student', sid=student.student_id) }}">Edit Record</a>
+    <form method="post" action="{{ url_for('delete_student', sid=student.student_id) }}"
+          onsubmit="return confirm('Delete {{ student.full_name }}? This cannot be undone.');">
+      <button class="btn btn-danger" type="submit">Delete Student</button>
+    </form>
+  </div>
+</div>
+
 {% endblock %}

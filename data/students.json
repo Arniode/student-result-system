@@ -12,6 +12,9 @@
             "Chemistry": 90,
             "Biology": 87
         },
+        "total": 442,
+        "average": 88.4,
+        "grade": "A",
         "date_added": "2026-11-14T09:15:00"
     },
     {
@@ -27,6 +30,9 @@
             "Chemistry": 74,
             "Biology": 66
         },
+        "total": 359,
+        "average": 71.8,
+        "grade": "A",
         "date_added": "2026-11-14T09:20:00"
     },
     {
@@ -42,6 +48,9 @@
             "Chemistry": 68,
             "Biology": 71
         },
+        "total": 336,
+        "average": 67.2,
+        "grade": "B",
         "date_added": "2026-11-14T09:25:00"
     },
     {
@@ -57,6 +66,9 @@
             "Chemistry": 52,
             "Biology": 57
         },
+        "total": 282,
+        "average": 56.4,
+        "grade": "C",
         "date_added": "2026-11-14T09:30:00"
     },
     {
@@ -72,6 +84,9 @@
             "Chemistry": 47,
             "Biology": 50
         },
+        "total": 242,
+        "average": 48.4,
+        "grade": "D",
         "date_added": "2026-11-14T09:35:00"
     },
     {
@@ -87,6 +102,9 @@
             "Chemistry": 35,
             "Biology": 39
         },
+        "total": 194,
+        "average": 38.8,
+        "grade": "F",
         "date_added": "2026-11-14T09:40:00"
     }
 ]
