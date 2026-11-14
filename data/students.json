@@ -1,1 +1,92 @@
-[]
+[
+    {
+        "student_id": "S001",
+        "full_name": "Adaeze Nwosu",
+        "class_form": "Form 3A",
+        "gender": "Female",
+        "dob": "2009-04-12",
+        "scores": {
+            "Mathematics": 92,
+            "English": 88,
+            "Physics": 85,
+            "Chemistry": 90,
+            "Biology": 87
+        },
+        "date_added": "2026-11-14T09:15:00"
+    },
+    {
+        "student_id": "S002",
+        "full_name": "Chinedu Okafor",
+        "class_form": "Form 3A",
+        "gender": "Male",
+        "dob": "2009-06-21",
+        "scores": {
+            "Mathematics": 78,
+            "English": 72,
+            "Physics": 69,
+            "Chemistry": 74,
+            "Biology": 66
+        },
+        "date_added": "2026-11-14T09:20:00"
+    },
+    {
+        "student_id": "S003",
+        "full_name": "Aisha Bello",
+        "class_form": "Form 3B",
+        "gender": "Female",
+        "dob": "2009-01-30",
+        "scores": {
+            "Mathematics": 64,
+            "English": 70,
+            "Physics": 63,
+            "Chemistry": 68,
+            "Biology": 71
+        },
+        "date_added": "2026-11-14T09:25:00"
+    },
+    {
+        "student_id": "S004",
+        "full_name": "Tunde Adeyemi",
+        "class_form": "Form 3B",
+        "gender": "Male",
+        "dob": "2008-11-05",
+        "scores": {
+            "Mathematics": 58,
+            "English": 60,
+            "Physics": 55,
+            "Chemistry": 52,
+            "Biology": 57
+        },
+        "date_added": "2026-11-14T09:30:00"
+    },
+    {
+        "student_id": "S005",
+        "full_name": "Grace Eze",
+        "class_form": "Form 3C",
+        "gender": "Female",
+        "dob": "2009-03-17",
+        "scores": {
+            "Mathematics": 48,
+            "English": 52,
+            "Physics": 45,
+            "Chemistry": 47,
+            "Biology": 50
+        },
+        "date_added": "2026-11-14T09:35:00"
+    },
+    {
+        "student_id": "S006",
+        "full_name": "Musa Ibrahim",
+        "class_form": "Form 3C",
+        "gender": "Male",
+        "dob": "2009-09-09",
+        "scores": {
+            "Mathematics": 40,
+            "English": 42,
+            "Physics": 38,
+            "Chemistry": 35,
+            "Biology": 39
+        },
+        "date_added": "2026-11-14T09:40:00"
+    }
+]
